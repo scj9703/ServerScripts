@@ -1,4 +1,4 @@
-// Used in the Interact Tab of a CNPC.
+// Used in the Interact Tab of a CNPC. Configured by Default to be used on 'Time Rift' NPCs.
 var x = 10368;
 var y = 95;
 var z = 11133;
@@ -8,21 +8,25 @@ var rarity = 0; // 0 = N, 1 = R, 2 = SR
 
 var p = event.getPlayer();
 var rift = p.getStoredData("riftCC"); // Value of whether a player has interacted with this rift.
+
 if (rift == null){
-rift = 0; // initialize as false
-p.setStoredData("riftCC", rift);
+  rift = 0; // initialize as false
+  p.setStoredData("riftCC", rift);
 }
+
 var inv = p.getInventory();
 var w = event.API.getIWorld(0);
 var chest = w.getBlock(x,y,z).getContainer();
+
 if (p != null && chest != null && rift == 0){
-// Give the player a one-time Item
-p.giveItem(chest.getSlot(rarity), 1);
-p.sendMessage("&2A Scroll manifests...");
-p.setStoredData("riftCC", 1);
+  // Give the player a one-time Item
+  p.giveItem(chest.getSlot(rarity), 1);
+  p.sendMessage("&2A Scroll manifests...");
+  p.setStoredData("riftCC", 1);
 }
+
 if (rift != 0){
-p.sendMessage("&2This Rift is already known to you...");
+  p.sendMessage("&2This Rift is already known to you...");
 }
 
 npc.executeCommand("tp " + p.getName() + " 10122 65 -11"); // The Rift teleports the player regardless of if they interacted previously
