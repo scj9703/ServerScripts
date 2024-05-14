@@ -1,4 +1,4 @@
-// Z-Script - Used to make NPC set-up and scripting easier.
+// Z-Script - Used to make NPC set-up and scripting easier for the CustomNPC+ Minecraft Mod.
 //
 // Player entity documentation, contains all functions, player.getName() etc.
 // https://kamkeel.github.io/CustomNPC-Plus/noppes/npcs/api/entity/IPlayer.html
@@ -20,7 +20,7 @@ function init(e){
     var homeY = n.getHomeY();
     var homeZ = n.getHomeZ();
     ///// NPC SETUP /////
-    // WARNING: IT IS RECOMMENDED TO DELETE MUCH OF THIS SECTION AFTER YOU FINISH MAKING YOUR NPC.
+    // WARNING: IT IS RECOMMENDED TO COMMENT OUT MUCH OF THIS SECTION AFTER YOU FINISH MAKING YOUR NPC.
     // OTHERWISE, IF WE CHANGE NPCS IN MASS, THIS NPC WILL HAVE TROUBLE UPDATING.
     n.setName("Saibaman"); // NPC name
     //n.setTitle("Raditz-Level Enemy"); // Text appearing under NPC Name
