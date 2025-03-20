@@ -3,7 +3,7 @@
 
 
 var ARENA_CENTER = [-9740, 92, -10699];
-var dashSpeed = 1; // fuck around w/ this
+var dashSpeed = 1; // mess around w/ this
 var TELEGRAPH_PARTICLE = "customnpcs:textures/items/npcFireSpell.png"
 var TELEGRAPH_HEXCODE = 0xd1001c; // d1001c = blood orange color
 var telegraphDuration = 60;
@@ -13,8 +13,6 @@ var BOMB_TEXTURE = "customnpcs:textures/items/npcOrb.png"
 
 ///////////////////////////////////////////////////////////////////////////////// HELPER FUNCS
 
-// make sure this works
-// TODO: isn't this a cross????????????
 function warnParticles(npc, dr, dp, distance, height) 
 {
     var part = API.createParticle(TELEGRAPH_PARTICLE);
@@ -91,6 +89,7 @@ function throwAtPlayer(e)
     else
     {
         // if cannot find player, fly at arena center
+        // disabled for now because overloading not supported
         //dash(npc, ARENA_CENTER[0], ARENA_CENTER[2], dashSpeed);
     }
 }
@@ -99,8 +98,7 @@ function throwAtPlayer(e)
 function telegraphRing(e)
 {
     var npc = e.npc;
-    // TODO: this is almost certainly a cross...
-    // TODO: og value of distance argument was 50, what??
+    
     warnParticles(npc, 0, 0, BOMB_RANGE_RADIUS, 4);
     warnParticles(npc, 90, 0, BOMB_RANGE_RADIUS, 4);
     warnParticles(npc, 180, 0, BOMB_RANGE_RADIUS, 4);
@@ -145,7 +143,7 @@ function init(e)
     textureParticle.setMaxAge(40 + telegraphDuration);
     textureParticle.spawn(npc)
     // timer duration should be 'how long does it take bomb to hit the ground and stay there'
-    // fuck around with this
+    // mess around with this
     e.npc.getTimers().forceStart(TELEGRAPH, 40, false);
 }
 
