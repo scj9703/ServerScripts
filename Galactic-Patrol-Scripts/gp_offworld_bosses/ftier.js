@@ -2,11 +2,12 @@
 // Additional Setup Needed: Must have an aura that is just a glowing white or red outline, toggled off.
 // AUTHOR: Mighty
 
-var ARENA_CENTER = [0, 100, 0];
-var speed = 8;
+var ARENA_CENTER = [-9746, 97, -11552];
+var speed = 6;
 var SMOKE_BOMB_ASSET = "https://i.imgur.com/UxM3O4r.png";
 var BLASTER_PROJECTILE = API.createItem("customnpcs:npcHolySpell", 1, 1); // 1/1 = damage/size
 var hpForUltimate = 0.50;
+var dashSpeed = 1;
 
 ////////////////////////////////////////////////////// IMPORTED FUNCTIONS
 
@@ -76,15 +77,37 @@ function smokeBomb(e)
     smokeCloud.setGlows(true); 
     smokeCloud.setFacePlayer(true);
     smokeCloud.setMaxAge(120);
-    smokeCloud.spawn(npc.getWorld(), npc.x, npc.y, npc.z);
+    smokeCloud.setPosition(npc.getPosition());
+    smokeCloud.spawn(npc.getWorld());
     npc.setSpeed(0);
     // warp to center
-    npc.setMotion(ARENA_CENTER[0], ARENA_CENTER[1]+10, ARENA_CENTER[2]);
-
     auraOn(npc);
-    doAnimation("FinalFlash"); 
+    doAnimation(e, "FinalFlash"); 
     
     npc.say("&eOver here!");
+    dashToLocation(e, ARENA_CENTER[0], ARENA_CENTER[2])
+}
+
+// Dash towards the coordinates given.
+// Param e - Any NPC event
+// Param locX, locZ - x and z coordinates to dash to
+function dashToLocation(e, locX, locZ) 
+{ 
+    var npc = e.npc;
+    
+    var angle = getDirection(npc, locX, locZ);
+    var x = -Math.cos(angle) * dashSpeed; 
+    var z = -Math.sin(angle) * dashSpeed;
+    npc.setMotion(x, 0.2, z);
+}
+
+// Get the direction to a set of coordinates. AUTHOR: Riken
+// Param npc - the NPC to get the direction from
+// Param x - the x-coordinate to get the direction to
+// Param z - the z-coordinate to get the direction to
+function getDirection(npc, x, z) 
+{ 
+    return Math.atan2(npc.getZ()-z, npc.getX()-x)
 }
 
 function blasterAttack(e)
@@ -98,9 +121,9 @@ function blasterAttack(e)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////// HOOKS
 
-var laserCooldown = 200;
+var laserCooldown = 300;
 var LASER_TELEGRAPH = 1;
-var laserTelegraphDuration = 60;
+var laserTelegraphDuration = 40;
 var FIRE_LASER = 2;
 var SMOKE_BOMB = 3;
 var BLASTER_ATTACK = 5;
@@ -108,8 +131,11 @@ var BLASTER_ATTACK = 5;
 function init(e)
 {
     var npc = e.npc
-    npc.getTimers().forceStart(LASER_TELEGRAPH, laserCooldown, false);
+    npc.getTimers().clear();
+    npc.getTimers().forceStart(LASER_TELEGRAPH, 200, false);
     npc.setTempData("HasUlted", 0)
+    auraOff(npc);
+    npc.setSpeed(speed);
 }
 
 function damaged(e)
@@ -128,7 +154,7 @@ function tick(e)
 {
     var npc = e.npc
     var ulted = npc.getTempData("HasUlted")
-    if (!ulted && npc.getHealth() < npc.getMaxHealth*hpForUltimate)
+    if (!ulted && (npc.getHealth() < npc.getMaxHealth()*hpForUltimate))
     {
         npc.setTempData("HasUlted", 1)
         npc.getTimers().forceStart(SMOKE_BOMB, 1, false);
@@ -150,11 +176,9 @@ function timer(e)
             npc.getTimers().forceStart(LASER_TELEGRAPH, laserCooldown, false);
             break;
         case SMOKE_BOMB:
-            npc.getTimers().stop(BLASTER_ATTACK_TELEGRAPH);
-            npc.getTimers().stop(BLASTER_ATTACK);
-            smokeBomb(e);
             npc.getTimers().forceStart(BLASTER_ATTACK, 50, false);
             npc.setTempData("ShotsFired", 0);
+            smokeBomb(e);
             break;
         case BLASTER_ATTACK:
             blasterAttack(e);
@@ -165,13 +189,13 @@ function timer(e)
                 shotsFired = 0;
                 npc.getTimers().forceStart(LASER_TELEGRAPH, laserCooldown, false);
                 npc.setSpeed(speed);
+                auraOff(npc);
             }
             else
             {
                 npc.getTimers().forceStart(BLASTER_ATTACK, 5, false);
             }
+            npc.setTempData("ShotsFired", shotsFired);
             break;
-        default:
-            npc.say("&c&lInvalid timer of " + id + ": Report this to Mighty or Head Dev");
     }
 }
