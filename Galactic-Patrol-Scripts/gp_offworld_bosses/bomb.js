@@ -2,13 +2,14 @@
 // AUTHOR: Mighty
 
 
-var ARENA_CENTER = [0, 100, 0];
-var dashSpeed = 5; // fuck around w/ this
+var ARENA_CENTER = [-9740, 92, -10699];
+var dashSpeed = 1; // fuck around w/ this
 var TELEGRAPH_PARTICLE = "customnpcs:textures/items/npcFireSpell.png"
 var TELEGRAPH_HEXCODE = 0xd1001c; // d1001c = blood orange color
-var telegraphDuration = 25;
+var telegraphDuration = 60;
 var BOMB_RANGE_RADIUS = 5; // radius, NOT diameter
 var BOMB_DAMAGE = 0.5;
+var BOMB_TEXTURE = "customnpcs:textures/items/npcOrb.png"
 
 ///////////////////////////////////////////////////////////////////////////////// HELPER FUNCS
 
@@ -16,7 +17,7 @@ var BOMB_DAMAGE = 0.5;
 // TODO: isn't this a cross????????????
 function warnParticles(npc, dr, dp, distance, height) 
 {
-    var particle = API.createParticle(TELEGRAPH_PARTICLE);
+    var part = API.createParticle(TELEGRAPH_PARTICLE);
     var angle = dr * Math.PI / 180;
     var pitch = dp * Math.PI / 180;
     for (var h = 0; h < height; h++) 
@@ -48,19 +49,19 @@ function dash(npc, entity, dashSpeed)
 {
     var angle = getDirection(npc, entity)
     var x = -Math.cos(angle) * dashSpeed
-    var z = -Math.sin(angle) * dashSpeed
-    
-    npc.setMotion(x, 3.0, z)
+    var z = -Math.sin(angle) * dashSpeed    
+    npc.setMotion(x, 1.0, z)
 }
 
-function dash(npc, xCoordinate, zCoordinate, dashSpeed)
-{
-    var angle = getDirection(npc, xCoordinate, zCoordinate);
-    var x = -Math.cos(angle) * dashSpeed
-    var z = -Math.sin(angle) * dashSpeed
+// function dash(npc, xCoordinate, zCoordinate, dashSpeed)
+// {
+//     var angle = getDirection(npc, xCoordinate, zCoordinate);
+//     var x = -Math.cos(angle) * dashSpeed
+//     var z = -Math.sin(angle) * dashSpeed
+//     npc.say("dashCoords " + x + " " + z);
     
-    npc.setMotion(x, 3.0, z)
-}
+//     npc.setMotion(x, 1.0, z)
+// }
 
 
 function getDirection(npc, entity) 
@@ -68,10 +69,10 @@ function getDirection(npc, entity)
     return Math.atan2(npc.getZ()-entity.getZ(), npc.getX()-entity.getX())
 }
 
-function getDirection(npc, xCoordinate, zCoordinate)
-{
-    return Math.atan2(npc.getZ()-zCoordinate, npc.getX()-xCoordinate);
-}
+// function getDirection(npc, xCoordinate, zCoordinate)
+// {
+//     return Math.atan2(npc.getZ()-zCoordinate, npc.getX()-xCoordinate);
+// }
 
 
 //////////////////////////////////////////////////////////////////////////////// FUNCTIONS
@@ -79,7 +80,7 @@ function getDirection(npc, xCoordinate, zCoordinate)
 function throwAtPlayer(e)
 {
     var npc = e.npc;
-    var players = npc.getSurroundingEntities(10, 1)
+    var players = npc.getSurroundingEntities(50, 1)
     if (players.length != 0)
     {
         // just pick the first player in the array, there will rarely if ever
@@ -90,13 +91,14 @@ function throwAtPlayer(e)
     else
     {
         // if cannot find player, fly at arena center
-        dash(npc, ARENA_CENTER[0], ARENA_CENTER[2], dashSpeed);
+        //dash(npc, ARENA_CENTER[0], ARENA_CENTER[2], dashSpeed);
     }
 }
 
 // make pretty ring of colors
 function telegraphRing(e)
 {
+    var npc = e.npc;
     // TODO: this is almost certainly a cross...
     // TODO: og value of distance argument was 50, what??
     warnParticles(npc, 0, 0, BOMB_RANGE_RADIUS, 4);
@@ -133,6 +135,15 @@ var EXPLODE = 2;
 function init(e)
 {
     throwAtPlayer(e);
+    var npc = e.npc;
+    npc.getTimers().clear();
+    var textureParticle = API.createParticle(BOMB_TEXTURE);
+    textureParticle.setScale(10,10, 200, 0)
+    textureParticle.setHEXColor(0x000000,0xffff00,2,0) // alternate colors
+    textureParticle.setGlows(true)
+    textureParticle.setFacePlayer(true)
+    textureParticle.setMaxAge(40 + telegraphDuration);
+    textureParticle.spawn(npc)
     // timer duration should be 'how long does it take bomb to hit the ground and stay there'
     // fuck around with this
     e.npc.getTimers().forceStart(TELEGRAPH, 40, false);
