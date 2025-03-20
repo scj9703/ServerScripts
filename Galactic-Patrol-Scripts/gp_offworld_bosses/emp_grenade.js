@@ -1,23 +1,23 @@
 // emp_grenade.js - D-Tier Bounty Hunter's EMP grenade, disrupts player's ki if hits
 // AUTHOR: Mighty
 
-var ARENA_CENTER = [0, 100, 0];
-var dashSpeed = 5; // fuck around w/ this
+var ARENA_CENTER = [-9740, 92, -10699];
+var dashSpeed = 1; // mess around w/ this
 var TELEGRAPH_PARTICLE = "customnpcs:textures/items/npcIceSpell.png"
 var TELEGRAPH_HEXCODE = 0x4169e1; // 4169e1 = royal blue
-var telegraphDuration = 25;
+var telegraphDuration = 60;
 var BOMB_RANGE_RADIUS = 5; // radius, NOT diameter
 var BOMB_DAMAGE = 0.5;
 var TELEGRAPH_ASSET = "https://i.imgur.com/WGH0Vkr.png"
-var EXPLOSION_ASSET = "https://i.imgur.com/vOZG5Da.png" // time to steal something off the internet
+var EXPLOSION_ASSET = "https://i.imgur.com/vOZG5Da.png"
+var BOMB_TEXTURE = "customnpcs:textures/items/npcAmethyst.png"
 
 ///////////////////////////////////////////////////////////////////////////////// HELPER FUNCS
 
-// make sure this works
-// TODO: isn't this a cross????????????
+// Cross of particles
 function warnParticles(npc, dr, dp, distance, height) 
 {
-    var particle = API.createParticle(TELEGRAPH_PARTICLE);
+    var part = API.createParticle(TELEGRAPH_PARTICLE);
     var angle = dr * Math.PI / 180;
     var pitch = dp * Math.PI / 180;
     for (var h = 0; h < height; h++) 
@@ -54,14 +54,6 @@ function dash(npc, entity, dashSpeed)
     npc.setMotion(x, 3.0, z)
 }
 
-function dash(npc, xCoordinate, zCoordinate, dashSpeed)
-{
-    var angle = getDirection(npc, xCoordinate, zCoordinate);
-    var x = -Math.cos(angle) * dashSpeed
-    var z = -Math.sin(angle) * dashSpeed
-    
-    npc.setMotion(x, 3.0, z)
-}
 
 
 function getDirection(npc, entity) 
@@ -69,10 +61,6 @@ function getDirection(npc, entity)
     return Math.atan2(npc.getZ()-entity.getZ(), npc.getX()-entity.getX())
 }
 
-function getDirection(npc, xCoordinate, zCoordinate)
-{
-    return Math.atan2(npc.getZ()-zCoordinate, npc.getX()-xCoordinate);
-}
 
 
 //////////////////////////////////////////////////////////////////////////////// FUNCTIONS
@@ -80,7 +68,7 @@ function getDirection(npc, xCoordinate, zCoordinate)
 function throwAtPlayer(e)
 {
     var npc = e.npc;
-    var players = npc.getSurroundingEntities(10, 1)
+    var players = npc.getSurroundingEntities(50, 1)
     if (players.length != 0)
     {
         // just pick the first player in the array, there will rarely if ever
@@ -91,23 +79,24 @@ function throwAtPlayer(e)
     else
     {
         // if cannot find player, fly at arena center
-        dash(npc, ARENA_CENTER[0], ARENA_CENTER[2], dashSpeed);
+        // disabled for now because of no overload support
+        //dash(npc, ARENA_CENTER[0], ARENA_CENTER[2], dashSpeed);
     }
 }
 
 // make pretty ring of colors
 function telegraphRing(e)
 {
+    var npc = e.npc;
     var chargeParticle = API.createParticle(TELEGRAPH_ASSET);
-    chargeParticle.setScale(50,50, 200, 0); // Keep size the same
+    chargeParticle.setScale(100,100, 200, 0); // Keep size the same
     chargeParticle.setAlpha(0.0,1.0, 1, 40); // Fade in electricity
     chargeParticle.setGlows(true); 
     chargeParticle.setFacePlayer(true);
     chargeParticle.setMaxAge(120);
     chargeParticle.setHEXColor(0x89cff0,0x0047ab,2,0) // make particle flash colors
     chargeParticle.spawn(npc);
-    // TODO: this is almost certainly a cross...
-    // TODO: og value of distance argument was 50, what??
+    
     warnParticles(npc, 0, 0, BOMB_RANGE_RADIUS, 4);
     warnParticles(npc, 90, 0, BOMB_RANGE_RADIUS, 4);
     warnParticles(npc, 180, 0, BOMB_RANGE_RADIUS, 4);
@@ -147,8 +136,17 @@ var EXPLODE = 2;
 function init(e)
 {
     throwAtPlayer(e);
+    var npc = e.npc;
+    npc.getTimers().clear();
+    var textureParticle = API.createParticle(BOMB_TEXTURE);
+    textureParticle.setScale(50,50, 200, 0)
+    textureParticle.setHEXColor(0x000000,0xffff00,2,0) // alternate colors
+    textureParticle.setGlows(true)
+    textureParticle.setFacePlayer(true)
+    textureParticle.setMaxAge(40 + telegraphDuration);
+    textureParticle.spawn(npc)
     // timer duration should be 'how long does it take bomb to hit the ground and stay there'
-    // fuck around with this
+    // mess around with this
     e.npc.getTimers().forceStart(TELEGRAPH, 40, false);
 }
 
