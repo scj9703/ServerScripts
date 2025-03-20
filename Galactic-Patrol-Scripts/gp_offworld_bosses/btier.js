@@ -4,9 +4,9 @@
 
 var SAND_ASSET = "https://i.imgur.com/a6herlG.png";
 var SANDSTORM_OVERLAY_ASSET = "https://i.imgur.com/H0aJlNJ.png";
-var ARENA_CENTER = [0, 69, 0];
-var INVIS_ID = 1; // check this shit TODO
-var VISIBLE_ID = 0; // check this shit
+var ARENA_CENTER = [-21925, 100, -21971];
+var INVIS_ID = 1; // check this TODO
+var VISIBLE_ID = 0; // check this
 var MINE_NPC_NAME = "Landmine";
 var MINE_NPC_TAB = 5;
 var speed = 9;
@@ -55,7 +55,7 @@ function blasterAttackTelegraph(e)
 {
     var npc = e.npc;
     auraOn(npc);
-    doAnimation("FinalFlash");
+    doAnimation(e, "FinalFlash");
     npc.setSpeed(0);
     npc.say("&eDon't move!");
 }
@@ -81,7 +81,7 @@ function breakLockon(e)
     for (var i = 0; i < players.length; i++)
     {
         var p = players[i];
-        p.getDBCPlayer().setLockOnTarget(null); // check this shit TODO
+        p.getDBCPlayer().setLockOnTarget(null); // check this TODO
     }
 }
 
@@ -91,7 +91,7 @@ function teleportTelegraph(e)
     var npc = e.npc;
     npc.setSpeed(0);
     auraOn(npc);
-    doAnimation(e, "Final Flash"); // looks like he's putting his guns together
+    doAnimation(e, "FinalFlash"); // looks like he's putting his guns together
     npc.say("Keep yer' eyes peeled, Patroller!");
 }
 
@@ -135,7 +135,7 @@ function sandstormOn(e)
         {
             var p = players[i];
             p.sendMessage("&6A &6sandstorm &6kicked &6up! &6Health &6decreases &6over &6time!");
-            // uhhh do the overlay shit :3 i forgot how it goes
+            // add overlay TODO
         }
 }
 
