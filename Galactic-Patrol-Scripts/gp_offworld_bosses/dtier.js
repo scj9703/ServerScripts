@@ -1,7 +1,7 @@
 // D-Tier Bounty Hunter - script for D-Tier offworld boss
 // Additional Setup Needed: Must have an aura that is just a glowing white or red outline, toggled off.
 // AUTHOR: Mighty
-var ARENA_CENTER = [0, 100, 0];
+var ARENA_CENTER = [-9740, 92, -10699];
 var speed = 8;
 var BLASTER_PROJECTILE = API.createItem("customnpcs:npcHolySpell", 1, 1);
 var hpForUltimate = 0.33;
@@ -34,7 +34,7 @@ function auraOn(npc)
 function auraOff(npc)
 {
     var dbcDisplay = DBCAPI.getDBCDisplay(npc);
-    dbcDisplay.toggleAura(true);
+    dbcDisplay.toggleAura(false);
     npc.updateClient();
 }
 
@@ -45,7 +45,7 @@ function blasterAttackTelegraph(e)
 {
     var npc = e.npc;
     auraOn(npc);
-    doAnimation("LeftHandKi"); // gun in left hand, throw gadgets from right
+    doAnimation(e, "LeftHandKi"); // gun in left hand, throw gadgets from right
     npc.setSpeed(0);
     npc.say("&eDon't move!");
 }
@@ -73,7 +73,7 @@ function bombThrow(e)
     auraOff(npc);
     npc.setSpeed(speed);
     doAnimation(e, "BigBangAttack");
-    npc.getWorld().spawnClone(npc.x, npc.y, npc.y, NPC_TAB, BOMB_NPC_NAME);
+    npc.getWorld().spawnClone(npc.x, npc.y, npc.z, NPC_TAB, BOMB_NPC_NAME);
 }
 
 function empGrenadeTelegraph(e)
@@ -97,7 +97,7 @@ function empGrenade(e)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////// HOOKS
 
 var attackCooldown = 100;
-var attackTelegraphDuration = 40;
+var attackTelegraphDuration = 60;
 var BOMB_THROW_TELEGRAPH = 1;
 var BOMB_THROW = 2;
 var BLASTER_ATTACK_TELEGRAPH = 3;
@@ -108,7 +108,9 @@ var EMP_GRENADE = 6;
 function init(e)
 {
     var npc = e.npc
+    npc.getTimers().clear();
     npc.getTimers().forceStart(BOMB_THROW_TELEGRAPH, attackCooldown, false);
+    auraOff(npc);
     npc.setTempData("HasUlted", 0)
 }
 
@@ -116,7 +118,7 @@ function tick(e)
 {
     var npc = e.npc
     var ulted = npc.getTempData("HasUlted")
-    if (!ulted && npc.getHealth() < npc.getMaxHealth*hpForUltimate)
+    if (!ulted && npc.getHealth() < npc.getMaxHealth()*hpForUltimate)
     {
         npc.setTempData("HasUlted", 1);
         npc.getTimers().forceStart(EMP_GRENADE_TELEGRAPH, 1, false);
@@ -181,6 +183,7 @@ function timer(e)
             {
                 npc.getTimers().forceStart(BLASTER_ATTACK, 10, false);
             }
+            npc.setTempData("ShotsFired", shotsFired);
             break;
     }
 }
